@@ -1,1 +1,2 @@
-pip install beai
+beatifulsoup4
+requests

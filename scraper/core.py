@@ -1,4 +1,3 @@
-from re import A
 import requests
 from bs4 import BeautifulSoup
 
@@ -17,11 +16,7 @@ def get_desc(article):
         return 'Desc: ' + p_content
 
 if __name__ == "__main__":
-    #TODO: change base url
-    #TODO: optimized the requests to 1 only for faster execution time
-    base_url = "https://vnexpress.net"
-    start_url = "https://vnexpress.net/giao-duc"
-    next_url = start_url                            #compensate for starting the loop
+    next_url = "https://vnexpress.net/giao-duc"                #compensate for starting the loop
     
     with open('output.txt', 'w') as output:
         while(True):
@@ -56,4 +51,4 @@ if __name__ == "__main__":
             if a_tag is None:
                 break
             
-            next_url = base_url + a_tag['href']
+            next_url = "https://vnexpress.net" + a_tag['href']

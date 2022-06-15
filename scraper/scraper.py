@@ -16,19 +16,18 @@ def get_desc(article):
         return 'Desc: ' + p_content
 
 if __name__ == "__main__":
-    next_url = "https://vnexpress.net/giao-duc"                #compensate for starting the loop
+    #compensate for starting the loop
+    base_url = "https://vnexpress.net/giao-duc"
     
     with open('output.txt', 'w') as output:
         while(True):
-            req = requests.get(next_url)
+            req = requests.get(base_url)
             soup = BeautifulSoup(req.content, 'html.parser')
             
-            #* Get title and desc of news 
-            
-            articleTags = soup.find_all('article')          # get all article
+            #* Get title and desc of news
+            articleTags = soup.find_all('article')
             
             for article in articleTags:
-                
                 title = get_title(article)
                 
                 if title:
@@ -45,10 +44,9 @@ if __name__ == "__main__":
                     output.write('\n')
                     
             #* Find and Assign the next link
-            
             a_tag = soup.find('a', class_='next-page')
             
-            if a_tag is None:
+            if not a_tag:
                 break
             
-            next_url = "https://vnexpress.net" + a_tag['href']
+            base_url = "https://vnexpress.net" + a_tag['href']

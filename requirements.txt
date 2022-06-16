@@ -1,2 +1,2 @@
-beatifulsoup4 4.11.1
-requests 2.28.0
+beatifulsoup4==4.11.1
+requests==2.28.0

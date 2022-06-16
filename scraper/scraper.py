@@ -19,34 +19,21 @@ if __name__ == "__main__":
     #compensate for starting the loop
     base_url = "https://vnexpress.net/giao-duc"
     
-    with open('output.txt', 'w') as output:
-        while(True):
-            req = requests.get(base_url)
-            soup = BeautifulSoup(req.content, 'html.parser')
-            
-            #* Get title and desc of news
-            articleTags = soup.find_all('article')
-            
-            for article in articleTags:
-                title = get_title(article)
+    while(True):
+        req = requests.get(base_url)
+        soup = BeautifulSoup(req.content, 'html.parser')
+        
+        #* Get title and desc of news
+        articleTags = soup.find_all('article')
+        
+        for article in articleTags:
+            title = get_title(article)
+            desc = get_desc(article)
                 
-                if title:
-                    output.write(title)
-                    output.write('\n')
-                
-                desc = get_desc(article)
-                
-                if desc:
-                    output.write(desc)
-                    output.write('\n')
-                else:
-                    output.write('Desc: No description')
-                    output.write('\n')
-                    
-            #* Find and Assign the next link
-            a_tag = soup.find('a', class_='next-page')
-            
-            if not a_tag:
-                break
-            
-            base_url = "https://vnexpress.net" + a_tag['href']
+        #* Find and Assign the next link
+        a_tag = soup.find('a', class_='next-page')
+        
+        if not a_tag:
+            break
+        
+        base_url = "https://vnexpress.net" + a_tag['href']

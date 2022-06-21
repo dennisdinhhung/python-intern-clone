@@ -4,3 +4,6 @@ scraper/test.py
 scraper/output.txt
 /test-sql
 demoproject/demoproject/__pycache__
+/.vscode
+demoproject/newsscraper/__pycache__
+demoproject/newsscraper/migrations/__pycache__

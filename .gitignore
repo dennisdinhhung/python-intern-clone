@@ -7,3 +7,4 @@ demoproject/demoproject/__pycache__
 /.vscode
 demoproject/newsscraper/__pycache__
 demoproject/newsscraper/migrations/__pycache__
+/.venv

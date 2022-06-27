@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from newsscraper.models import News
+from articlescraper.models import News
 
 class NewsSeralizer(serializers.HyperlinkedModelSerializer):
     class Meta:

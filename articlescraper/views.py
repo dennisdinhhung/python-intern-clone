@@ -1,11 +1,12 @@
 from django.http import Http404, HttpResponse
 from django.shortcuts import render
+from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, filters
+from rest_framework.pagination import LimitOffsetPagination
 from articlescraper import serializers
 from articlescraper.models import News
-
 from articlescraper.scraper import scrape
 from articlescraper.serializers import NewsSeralizer
 
@@ -21,7 +22,10 @@ class ListNewsArticle(APIView):
     
     def get(self, request):
         queryset = News.objects.all()
-        serializer = NewsSeralizer(queryset, many=True)
+        paginator = Paginator(queryset, 100)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        serializer = NewsSeralizer(page_obj, many=True)
         return Response(serializer.data)
     
     def post(self, request):
@@ -58,3 +62,12 @@ class Scraper(APIView):
             News.objects.create(title=title, desc=desc, url=url)
         
         return HttpResponse(list)
+    
+class Search(APIView):
+    queryset = News.objects.all()
+    def get(self, request):
+        title = request.query_params.get('title')
+        if title:
+            newsarticle = self.queryset.filter(title__icontains=title)
+            serializer = NewsSeralizer(newsarticle, many=True)
+        return Response(serializer.data)

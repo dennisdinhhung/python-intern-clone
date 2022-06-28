@@ -8,3 +8,5 @@ demoproject/demoproject/__pycache__
 demoproject/newsscraper/__pycache__
 demoproject/newsscraper/migrations/__pycache__
 /.venv
+articlescraper/__pycache__
+

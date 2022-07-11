@@ -4,14 +4,13 @@ from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, filters
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from articlescraper import serializers
 from articlescraper.models import News
 from articlescraper.scraper import scrape
 from articlescraper.serializers import NewsSeralizer
 
 class ListNewsArticle(APIView):  
-    queryset = News.objects.all()
     permission_classes = []
     
     def get_object(self, pk):
@@ -22,9 +21,8 @@ class ListNewsArticle(APIView):
     
     def get(self, request):
         queryset = News.objects.all()
-        paginator = Paginator(queryset, 100)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+        paginator = PageNumberPagination()
+        page_obj = paginator.paginate_queryset(queryset, request)
         serializer = NewsSeralizer(page_obj, many=True)
         return Response(serializer.data)
     
@@ -59,7 +57,7 @@ class Scraper(APIView):
             desc = item["desc"]
             url = item['url']
         
-            News.objects.create(title=title, desc=desc, url=url)
+            News.objects.create(title=title, desc=desc, url=url) #look up bulk create
         
         return HttpResponse(list)
     

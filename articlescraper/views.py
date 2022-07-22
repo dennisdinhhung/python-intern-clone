@@ -1,6 +1,7 @@
 from django.http import Http404, HttpResponse
 from django.shortcuts import render
 from django.core.paginator import Paginator
+from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, filters
@@ -11,7 +12,7 @@ from articlescraper.scraper import scrape
 from articlescraper.serializers import NewsSeralizer
 
 class ListNewsArticle(APIView):  
-    permission_classes = []
+    permission_classes = [permissions.IsAuthenticated]
     
     def get_object(self, pk):
         try:
@@ -47,6 +48,7 @@ class ListNewsArticle(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class Scraper(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = News.objects.all()
     
     def get(self, request):
@@ -62,6 +64,7 @@ class Scraper(APIView):
         return HttpResponse(list)
     
 class Search(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = News.objects.all()
     def get(self, request):
         title = request.query_params.get('title')

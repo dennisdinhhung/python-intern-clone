@@ -10,3 +10,5 @@ demoproject/newsscraper/migrations/__pycache__
 /.venv
 articlescraper/__pycache__
 
+djangoscraper/__pycache__/
+/__pycache__

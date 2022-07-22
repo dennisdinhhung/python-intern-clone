@@ -18,5 +18,6 @@ from django.urls import include, path
 
 urlpatterns = [
     path('scrape/', include('articlescraper.urls')),
+    path('auth/', include('authenticator.urls')),
     path('admin/', admin.site.urls),
 ]

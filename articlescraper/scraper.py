@@ -30,14 +30,12 @@ def scrape():
     #compensate for starting the loop
     base_url = "https://vnexpress.net/giao-duc"
     list_content = []
-    
     while(True):
         req = requests.get(base_url)
         soup = BeautifulSoup(req.content, 'html.parser')
         
         #* Get title and desc of news
         articleTags = soup.find_all('article')
-        
         for article in articleTags:
             article_dict = {}
             article_dict['title'] = get_title(article)
@@ -53,10 +51,7 @@ def scrape():
                 
         #* Find and Assign the next link
         a_tag = soup.find('a', class_='next-page')
-        
         if not a_tag:
             break
-        
         base_url = "https://vnexpress.net" + a_tag['href']
-        
     return list_content

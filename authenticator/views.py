@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from authenticator.models import TokenBlackList
 
 from authenticator.serializers import LoginSerializer
 from authenticator.utils import token_generator
@@ -25,4 +27,12 @@ class Login(APIView):
         return Response({
             "access-token": token,
             "message": "login success"
+        })
+
+class Logout(APIView):
+    
+    def post(self, request):
+        TokenBlackList.objects.create(id=request.jti, user_id=request.uid)
+        return Response({
+            "message": "Logout Successful."
         })

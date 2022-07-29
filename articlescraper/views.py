@@ -11,8 +11,7 @@ from articlescraper.models import News
 from articlescraper.scraper import scrape
 from articlescraper.serializers import NewsSerializer, PostNewsSerializer
 
-class ListNewsArticle(APIView):  
-    permission_classes = [permissions.IsAuthenticated]
+class ListNewsArticle(APIView):
     
     def get_object(self, pk):
         try:

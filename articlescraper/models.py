@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here.
+
 class News(models.Model):
     title = models.TextField()
     desc = models.TextField(null=True)

@@ -5,10 +5,6 @@ class NewsSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     desc = serializers.CharField()
     url = serializers.CharField(max_length=200)
-    # class Meta:
-    #     model = News
-    #     fields = ['id', 'title', 'desc', 'url'] 
-
 
 class PostNewsSerializer(serializers.Serializer):
     url = serializers.CharField(max_length=200)

@@ -1,7 +1,4 @@
-from turtle import title
-from django.http import Http404, HttpResponse
-from django.shortcuts import render
-from rest_framework import permissions
+from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from articlescraper.models import News
 from articlescraper.scraper import scrape
 from articlescraper.serializers import NewsSerializer, PostNewsSerializer
+from djangoscraper.celery import app as celery_app
 
 class ListNewsArticle(APIView):
     
@@ -33,7 +31,7 @@ class ListNewsArticle(APIView):
             desc = request.data.get("desc")
             url = request.data.get("url")
             News.objects.create(title=title, desc=desc, url=url)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request, pk):
@@ -45,30 +43,26 @@ class ListNewsArticle(APIView):
         if not news:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         News.objects.filter(id=pk).update(**serializer.validated_data)
-        return Response(serializer.data)
+        return Response(status=status.HTTP_200_OK)
         
     
     def delete(self, request, pk):
+        if not News.objects.filter(id=pk).first():
+            return Response({"message": "Entry not found"}, status=status.HTTP_400_BAD_REQUEST)
         entry = self.get_object(pk)
         entry.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class Scraper(APIView):
-    permission_classes = [permissions.IsAuthenticated]
     queryset = News.objects.all()
     
     def get(self, request):
-        list = scrape()
-        for item in list:
-            title = item["title"]
-            desc = item["desc"]
-            url = item['url']
-            News.objects.create(title=title, desc=desc, url=url) #look up bulk create
-        return HttpResponse(list)
+        celery_app.send_task('celery_scraper')
+        return Response(status=status.HTTP_200_OK)
     
 class Search(APIView):
-    permission_classes = [permissions.IsAuthenticated]
     queryset = News.objects.all()
+    
     def get(self, request):
         title = request.query_params.get('title')
         if title:

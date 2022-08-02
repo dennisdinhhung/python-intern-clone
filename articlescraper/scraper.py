@@ -1,5 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
+from rest_framework.exceptions import ValidationError
+from articlescraper.models import News
+
+from articlescraper.serializers import NewsSerializer
+from djangoscraper.celery import app as celery_app
 
 def get_title(article):
     """Return the title of the news"""
@@ -26,7 +31,8 @@ def get_url(article):
         a_tag = h3_tag.find('a')['href']
         return str(a_tag)
 
-def scrape():
+@celery_app.task(name='celery_scraper', bind=True)
+def scrape(self):
     #compensate for starting the loop
     base_url = "https://vnexpress.net/giao-duc"
     list_content = []
@@ -41,12 +47,10 @@ def scrape():
             article_dict['title'] = get_title(article)
             article_dict['desc'] = get_desc(article)
             article_dict['url'] = get_url(article)
-            
             if not article_dict['title']:
                 continue
             if not article_dict['desc']:
                 article_dict['desc'] = None
-                
             list_content.append(article_dict)
                 
         #* Find and Assign the next link
@@ -54,4 +58,15 @@ def scrape():
         if not a_tag:
             break
         base_url = "https://vnexpress.net" + a_tag['href']
-    return list_content
+    save(list_content)
+
+
+def save(list_content):
+    for item in list_content:
+        serializer = NewsSerializer(data=item)
+        if not serializer:
+            raise ValidationError(serializer.errors)
+        title = item["title"]
+        desc = item["desc"]
+        url = item['url']
+        News.objects.create(title=title, desc=desc, url=url)

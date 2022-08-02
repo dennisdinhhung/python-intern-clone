@@ -7,3 +7,4 @@ cryptography==37.0.2
 redis==4.3.4
 celery==5.2.7
 pyjwt==2.4.0
+python-dotenv==0.22.0

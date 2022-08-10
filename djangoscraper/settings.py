@@ -84,14 +84,14 @@ WSGI_APPLICATION = 'djangoscraper.wsgi.application'
 DATABASES = {  
     'default': {  
         'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'vnexpress',  
-        'USER': 'root',  
-        'PASSWORD': 'deathless',  
-        'HOST': '127.0.0.1',  
-        'PORT': '3306',  
-        'OPTIONS': {  
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
-        }  
+        'NAME': os.getenv('MYSQL_DB_NAME'),
+        'USER': os.getenv('MYSQL_DB_USERNAME'),  
+        'PASSWORD': os.getenv('MYSQL_DB_PASSWORD'),
+        'HOST': os.getenv('MYSQL_HOST'),
+        'PORT': os.getenv('MYSQL_PORT'),
+        # 'OPTIONS': {  
+        #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+        # }  
     }  
 }  
 
@@ -150,8 +150,11 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100
 }
 
+#SECRET KEY
+SECRET_KEY = os.getenv('SECRET_KEY')
+
 #SCRAPE SETTINGS
-URL = os.getenv('URL')
+SCRAPE_URL = os.getenv('SCRAPE_URL')
 
 #CELERY SETTINGS
 BROKER_URL = os.getenv('BROKER_URL')

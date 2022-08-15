@@ -8,10 +8,11 @@ services:
     volumes:
       - mysql:/var/lib/mysql/
     environment:
-      - MYSQL_DB_NAME=vnexpress
-      - MYSQL_DB_PASSWORD=deathless
-      - MYSQL_ROOT_PASSWORD=deathless
       - MYSQL_DATABASE=vnexpress
+      - MYSQL_PASSWORD=deathless
+      - MYSQL_ROOT_PASSWORD=deathless
+      - MYSQL_HOST='172.30.0.3'
+      - MYSQL_USER=root1
     # healthcheck:
     #   test: ["CMD", "mysqladmin", "ping", "-p${MYSQL_DB_PASSWORD}"]
     #   interval: 10s
@@ -35,6 +36,14 @@ services:
   #       condition: service_started
   #     redis:
   #       condition: service_started
+
+  # migrate:
+  #   build: .
+  #   command: python3 manage.py migrate --noinput
+  #   volumes:
+  #     - .:/app
+  #   depends_on:
+  #     - db
   
   django:
     build: .
@@ -47,11 +56,13 @@ services:
     volumes:
       - .:/app
     environment:
-      - MYSQL_NAME=vnexpress
+      - MYSQL_DATABASE=vnexpress
       - MYSQL_PASSWORD=deathless
       - MYSQL_ROOT_PASSWORD=deathless
+      - MYSQL_USER=root1
     depends_on:
       - db
+      # - migrate
       # db:
       #   condition: service_healthy
 

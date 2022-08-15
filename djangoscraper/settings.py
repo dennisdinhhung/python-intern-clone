@@ -84,11 +84,11 @@ WSGI_APPLICATION = 'djangoscraper.wsgi.application'
 DATABASES = {  
     'default': {  
         'ENGINE': 'django.db.backends.mysql',  
-        'NAME': os.getenv('MYSQL_DB_NAME'),
-        'USER': os.getenv('MYSQL_DB_USERNAME'),  
-        'PASSWORD': os.getenv('MYSQL_DB_PASSWORD'),
-        'HOST': os.getenv('MYSQL_HOST'),
-        'PORT': os.getenv('MYSQL_PORT'),
+        'NAME': 'vnexpress',
+        'USER': 'root1',  
+        'PASSWORD': 'deathless',
+        'HOST': 'db',
+        'PORT': 3306,
         # 'OPTIONS': {  
         #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
         # }  

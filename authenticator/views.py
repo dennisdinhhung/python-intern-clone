@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from authenticator.models import TokenBlackList
@@ -10,7 +9,7 @@ from authenticator.utils import token_generator
 
 
 class Login(APIView):
-    permission_classes = []
+    authentication_classes = []
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -22,7 +21,7 @@ class Login(APIView):
         if not user or not user.check_password(password):
           return Response({
                 "message": "Username or password is incorrect"
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            }, status=status.HTTP_400_BAD_REQUEST)
         token = token_generator(user)
         return Response({
             "access-token": token,

@@ -1,8 +1,8 @@
-import os
 import requests
 from bs4 import BeautifulSoup
 from djangoscraper import settings
 from rest_framework.exceptions import ValidationError
+
 from articlescraper.models import News
 from articlescraper.serializers import NewsSerializer
 from djangoscraper.celery import app as celery_app
@@ -35,7 +35,6 @@ def get_url(article):
 
 @celery_app.task(name='celery_scraper', bind=True)
 def scrape(self):
-#compensate for starting the loop
     base_url = settings.SCRAPE_URL
     list_content = []
     while(True):
@@ -60,7 +59,7 @@ def scrape(self):
         if not a_tag:
             break
         base_url = "https://vnexpress.net" + a_tag['href']
-    # save(list_content)
+    save(list_content)
 
 
 def save(list_content):
@@ -71,4 +70,5 @@ def save(list_content):
         title = item["title"]
         desc = item["desc"]
         url = item['url']
+        #check if the news is repeated 
         News.objects.create(title=title, desc=desc, url=url)

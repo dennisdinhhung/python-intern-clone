@@ -9,3 +9,6 @@ class NewsSerializer(serializers.Serializer):
 class PostNewsSerializer(serializers.Serializer):
     url = serializers.CharField(max_length=200)
     title = serializers.CharField(max_length=200)
+    
+    
+#add more serializers for each usage

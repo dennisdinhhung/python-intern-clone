@@ -1,71 +1,66 @@
-from django.http import Http404
+from email import message
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 
 from articlescraper.models import News
-from articlescraper.scraper import scrape
 from articlescraper.serializers import NewsSerializer, PostNewsSerializer
 from djangoscraper.celery import app as celery_app
 
 class ListNewsArticle(APIView):
-    
-    def get_object(self, pk):
-        try:
-            return News.objects.get(pk=pk)
-        except News.DoesNotExist:
-            raise Http404
+    queryset = News.objects.all()
     
     def get(self, request):
         queryset = News.objects.all()
         paginator = PageNumberPagination()
         page_obj = paginator.paginate_queryset(queryset, request)
         serializer = NewsSerializer(page_obj, many=True)
+        search = request.query_params.get('search')
+        if search:
+            newsarticle = self.queryset.filter(Q(title__icontains=search)|Q(desc__icontains=search)|Q(url__icontains=search))
+            serializer = NewsSerializer(newsarticle, many=True)
+            return Response(serializer.data)
         return Response(serializer.data)
     
     def post(self, request):
         serializer = PostNewsSerializer(data=request.data)
         if serializer.is_valid():
+            #check if url is repeated, if is, return 400
             title = request.data.get("title")
             desc = request.data.get("desc")
             url = request.data.get("url")
+            url_check = self.queryset.filter(url__icontains=url).first()
+            if url_check:
+                return Response({"message": "url already existed"},status=400)
             News.objects.create(title=title, desc=desc, url=url)
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            entry = self.queryset.filter(url__icontains=url).first()
+            return Response({"id": entry.id},status=201) #return the id of the news
+        return Response(serializer.errors, status=400)
     
     def put(self, request, pk):
-        entry = self.get_object(pk)
+        entry = News.objects.filter(id=pk).first()
         serializer = PostNewsSerializer(entry, data=request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=400)
         news = News.objects.filter(id=pk).first()
         if not news:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=400)
         News.objects.filter(id=pk).update(**serializer.validated_data)
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=200)
         
     
     def delete(self, request, pk):
-        if not News.objects.filter(id=pk).first():
-            return Response({"message": "Entry not found"}, status=status.HTTP_400_BAD_REQUEST)
-        entry = self.get_object(pk)
+        entry = News.objects.filter(id=pk).first()
+        if not entry:
+            return Response({"message": "Entry not found"}, status=400)
         entry.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=204)
 
 class Scraper(APIView):
     queryset = News.objects.all()
     
     def get(self, request):
         celery_app.send_task('celery_scraper')
-        return Response(status=status.HTTP_200_OK)
-    
-class Search(APIView):
-    queryset = News.objects.all()
-    
-    def get(self, request):
-        title = request.query_params.get('title')
-        if title:
-            newsarticle = self.queryset.filter(title__icontains=title)
-            serializer = NewsSerializer(newsarticle, many=True)
-        return Response(serializer.data)
+        return Response(status=200)

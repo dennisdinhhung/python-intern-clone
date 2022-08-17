@@ -9,7 +9,7 @@ def token_generator(user):
         "uid": user.id,
         "username": user.username,
         "iat": datetime.datetime.utcnow(),
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
     }
     key = settings.SECRET_KEY
     token = jwt.encode(payload, key)

@@ -1,8 +1,8 @@
+import jwt
 from django.contrib.auth.models import User
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import AuthenticationFailed
-import jwt
 
 from authenticator.models import TokenBlackList
 
@@ -22,7 +22,7 @@ class Authentication(BaseAuthentication):
       user = users.filter(id=uid).first()
       if TokenBlackList.objects.filter(id=jti).first():
         raise ValidationError(
-          'Incorrect authentication credentials.') #fix this later
+          'Incorrect authentication credentials.')
       if user:
         request.jti = jti
         request.uid = uid
@@ -32,3 +32,6 @@ class Authentication(BaseAuthentication):
     except jwt.exceptions.PyJWTError:
       raise ValidationError({'message': 'Token validation error'})
     return None
+  
+  def authenticate_header(self, request): #wtf is this
+    return "Authentication error"

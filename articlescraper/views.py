@@ -1,8 +1,6 @@
-from email import message
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 
 from articlescraper.models import News
@@ -19,10 +17,16 @@ class ListNewsArticle(APIView):
         serializer = NewsSerializer(page_obj, many=True)
         search = request.query_params.get('search')
         if search:
-            newsarticle = self.queryset.filter(Q(title__icontains=search)|Q(desc__icontains=search)|Q(url__icontains=search))
+            newsarticle = self.queryset.filter(Q(title__icontains=search)|
+                                               Q(desc__icontains=search)|
+                                               Q(url__icontains=search))
             serializer = NewsSerializer(newsarticle, many=True)
             return Response(serializer.data)
-        return Response(serializer.data)
+        return Response({
+            "total": queryset.count(),
+            "count": len(serializer.data),
+            "data": serializer.data
+        })
     
     def post(self, request):
         serializer = PostNewsSerializer(data=request.data)
@@ -36,8 +40,13 @@ class ListNewsArticle(APIView):
                 return Response({"message": "url already existed"},status=400)
             News.objects.create(title=title, desc=desc, url=url)
             entry = self.queryset.filter(url__icontains=url).first()
-            return Response({"id": entry.id},status=201) #return the id of the news
-        return Response(serializer.errors, status=400)
+            return Response(
+                {"id": entry.id},
+                status=201)
+        return Response(
+            serializer.errors,
+            status=400
+        )
     
     def put(self, request, pk):
         entry = News.objects.filter(id=pk).first()

@@ -35,31 +35,7 @@ def get_url(article):
 
 @celery_app.task(name='celery_scraper', bind=True)
 def scrape(self):
-    base_url = settings.SCRAPE_URL
-    list_content = []
-    while(True):
-        req = requests.get(base_url)
-        soup = BeautifulSoup(req.content, 'html.parser')
-        
-        #* Get title and desc of news
-        articleTags = soup.find_all('article')
-        for article in articleTags:
-            article_dict = {}
-            article_dict['title'] = get_title(article)
-            article_dict['desc'] = get_desc(article)
-            article_dict['url'] = get_url(article)
-            if not article_dict['title']:
-                continue
-            if not article_dict['desc']:
-                article_dict['desc'] = None
-            list_content.append(article_dict)
-                
-        #* Find and Assign the next link
-        a_tag = soup.find('a', class_='next-page')
-        if not a_tag:
-            break
-        base_url = "https://vnexpress.net" + a_tag['href']
-    save(list_content)
+    crawl(base_url=settings.SCRAPE_URL)
 
 
 def save(list_content):
@@ -70,5 +46,34 @@ def save(list_content):
         title = item["title"]
         desc = item["desc"]
         url = item['url']
-        #check if the news is repeated 
+        #!created_at
+        #!updated_at
+        queryset = News.objects.all()
+        url_check = queryset.filter(url__icontains=url).first()
+        if url_check:
+            continue
         News.objects.create(title=title, desc=desc, url=url)
+
+def crawl(base_url):
+    list_content = []
+    req = requests.get(base_url)
+    soup = BeautifulSoup(req.content, 'html.parser')
+    
+    # Get title and desc of news
+    articleTags = soup.find_all('article')
+    for article in articleTags:
+        article_dict = {}
+        article_dict['title'] = get_title(article)
+        article_dict['desc'] = get_desc(article)
+        article_dict['url'] = get_url(article)
+        if not article_dict['title']:
+            continue
+        if not article_dict['desc']:
+            article_dict['desc'] = None
+        list_content.append(article_dict)
+    save(list_content)
+    
+    a_tag = soup.find('a', class_='next-page')
+    if a_tag:
+        next_url = "https://vnexpress.net" + a_tag['href']
+        crawl(base_url=next_url)

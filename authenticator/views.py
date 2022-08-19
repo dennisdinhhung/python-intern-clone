@@ -19,7 +19,7 @@ class Login(APIView):
         password = request.data.get("password")
         user = User.objects.filter(username=username).first()
         if not user or not user.check_password(password):
-          return Response({
+            return Response({
                 "message": "Username or password is incorrect"
             }, status=status.HTTP_400_BAD_REQUEST)
         token = token_generator(user)
@@ -29,9 +29,10 @@ class Login(APIView):
         })
 
 class Logout(APIView):
-    
+
     def post(self, request):
-        TokenBlackList.objects.create(id=request.jti, user_id=request.uid)
+        TokenBlackList.objects.create(id=request.jti, 
+                                      user_id=request.uid)
         return Response({
             "message": "Logout Successful."
         })

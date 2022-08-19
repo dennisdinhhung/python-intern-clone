@@ -33,11 +33,6 @@ def get_url(article):
         a_tag = h3_tag.find('a')['href']
         return str(a_tag)
 
-@celery_app.task(name='celery_scraper', bind=True)
-def scrape(self):
-    crawl(base_url=settings.SCRAPE_URL)
-
-
 def save(list_content):
     for item in list_content:
         serializer = NewsSerializer(data=item)
@@ -46,8 +41,6 @@ def save(list_content):
         title = item["title"]
         desc = item["desc"]
         url = item['url']
-        #!created_at
-        #!updated_at
         queryset = News.objects.all()
         url_check = queryset.filter(url__icontains=url).first()
         if url_check:
@@ -77,3 +70,7 @@ def crawl(base_url):
     if a_tag:
         next_url = "https://vnexpress.net" + a_tag['href']
         crawl(base_url=next_url)
+        
+@celery_app.task(name='celery_scraper', bind=True)
+def scrape(self):
+    crawl(base_url=settings.SCRAPE_URL)

@@ -64,11 +64,11 @@ DATABASES = {
     'default': {  
         #change into using env        
         'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'vnexpress',
-        'USER': 'root',  #root1
-        'PASSWORD': 'deathless',
-        'HOST': '127.0.0.1', #db
-        'PORT': 3306,
+        'NAME': os.getenv('MYSQL_DATABASE'),
+        'USER': os.getenv('MYSQL_USER'),  #root1
+        'PASSWORD': os.getenv('MYSQL_PASSWORD'),
+        'HOST': os.getenv('MYSQL_HOST'), #db
+        'PORT': os.getenv('MYSQL_PORT'),
     }  
 }  
 

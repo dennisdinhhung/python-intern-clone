@@ -1,7 +1,8 @@
-import jwt
 import uuid
 import datetime
-from djangoscraper import settings
+import jwt
+
+from django.conf import settings
 
 def token_generator(user):
     payload = {

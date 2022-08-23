@@ -128,6 +128,9 @@ SECRET_KEY = os.getenv('SECRET_KEY') #'django-insecure-s*!smb-6abb1zsamtc-v$1cc^
 #SCRAPE SETTINGS
 SCRAPE_URL = os.getenv('SCRAPE_URL')
 
+#JWT EXPIRATION TIME
+JWT_EXP_MINUTE = os.getenv('JWT_EXP_MINUTE')
+
 #CELERY SETTINGS
 BROKER_URL = os.getenv('BROKER_URL')
 CELERY_RESULT = os.getenv('CELERY_RESULT')

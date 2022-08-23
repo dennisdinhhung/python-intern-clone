@@ -1,9 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
-from djangoscraper import settings
+from django.conf import settings
 from rest_framework.exceptions import ValidationError
 
-from articlescraper.models import News
+from articlescraper.models import NewsArticles
 from articlescraper.serializers import NewsSerializer
 from djangoscraper.celery import app as celery_app
 
@@ -38,14 +38,16 @@ def save(list_content):
         serializer = NewsSerializer(data=item)
         if not serializer:
             raise ValidationError(serializer.errors)
+        
         title = item["title"]
         desc = item["desc"]
         url = item['url']
-        queryset = News.objects.all()
+        queryset = NewsArticles.objects.all()
         url_check = queryset.filter(url__icontains=url).first()
         if url_check:
             continue
-        News.objects.create(title=title, desc=desc, url=url)
+        
+        NewsArticles.objects.create(title=title, desc=desc, url=url)
 
 def crawl(base_url):
     list_content = []
@@ -68,9 +70,9 @@ def crawl(base_url):
     
     a_tag = soup.find('a', class_='next-page')
     if a_tag:
-        next_url = "https://vnexpress.net" + a_tag['href']
+        next_url = settings.SCRAPE_URL + a_tag['href']
         crawl(base_url=next_url)
         
 @celery_app.task(name='celery_scraper', bind=True)
 def scrape(self):
-    crawl(base_url=settings.SCRAPE_URL)
+    crawl(base_url=settings.SCRAPE_URL + '/giao-duc')

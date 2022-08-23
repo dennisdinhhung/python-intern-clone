@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.conf import settings
 
 from authenticator.models import TokenBlackList
 from authenticator.serializers import LoginSerializer
@@ -14,14 +15,17 @@ class Login(APIView):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors)
-        username = request.data.get("username")
-        password = request.data.get("password")
+        
+        username = serializer.validated_data["username"]
+        password = serializer.validated_data["password"]
         user = User.objects.filter(username=username).first()
         if not user or (user and not user.check_password(password)):
             return Response({
                 "message": "Username or password is incorrect"
             }, status=401)
-        token = token_generator(user)
+        
+        exp_time = settings.JWT_EXP_MINUTE
+        token = token_generator(user, exp_time)
         return Response({
             "access_token": token,
             "message": "login success"
@@ -30,8 +34,10 @@ class Login(APIView):
 class Logout(APIView):
 
     def post(self, request):
-        TokenBlackList.objects.create(id=request.jti, 
-                                      user_id=request.uid)
+        jti = request.jti
+        user_id = request.uid
+        TokenBlackList.objects.create(jti=jti, 
+                                      user_id=user_id)
         return Response({
             "message": "Logout Successful."
         })

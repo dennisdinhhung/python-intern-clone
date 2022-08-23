@@ -3,13 +3,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
-from articlescraper.models import News
-from articlescraper.serializers import NewsSerializer, PostNewsSerializer
+from articlescraper.models import NewsArticles
+from articlescraper.serializers import NewsSerializer, PostNewsSerializer, PutNewsSerializer
 from djangoscraper.celery import app as celery_app
 
 
 class ListNewsArticle(APIView):
-    queryset = News.objects.all()
+    queryset = NewsArticles.objects.all()
     
     def get(self, request):
         search = request.query_params.get('search')
@@ -35,6 +35,7 @@ class ListNewsArticle(APIView):
             return Response(
                 serializer.errors,
                 status=400)
+            
         title = request.data.get("title")
         desc = request.data.get("desc")
         url = request.data.get("url")
@@ -42,7 +43,7 @@ class ListNewsArticle(APIView):
         if url_check:
             return Response({"message": "url already existed"},status=400)
         
-        News.objects.create(title=title, desc=desc, url=url)
+        NewsArticles.objects.create(title=title, desc=desc, url=url)
         entry = self.queryset.filter(url__icontains=url).first()
         return Response(
             {"id": entry.id},
@@ -50,28 +51,29 @@ class ListNewsArticle(APIView):
         
     
     def put(self, request, pk):
-        entry = News.objects.filter(id=pk).first()
-        serializer = PostNewsSerializer(entry, data=request.data)
+        entry = NewsArticles.objects.filter(id=pk).first()
+        serializer = PutNewsSerializer(entry, data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         
-        news = News.objects.filter(id=pk).first()
+        news = NewsArticles.objects.filter(id=pk).first()
         if not news:
             return Response(serializer.errors, status=400)
         
-        News.objects.filter(id=pk).update(**serializer.validated_data)
+        NewsArticles.objects.filter(id=pk).update(**serializer.validated_data)
         return Response(status=200)
         
     
     def delete(self, request, pk):
-        entry = News.objects.filter(id=pk).first()
+        entry = NewsArticles.objects.filter(id=pk).first()
+        #serialize the id 
         if not entry:
             return Response({"message": "Entry not found"}, status=400)
         entry.delete()
         return Response(status=204)
 
 class Scraper(APIView):
-    queryset = News.objects.all()
+    queryset = NewsArticles.objects.all()
     
     def get(self, request):
         celery_app.send_task('celery_scraper')

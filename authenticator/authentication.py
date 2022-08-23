@@ -15,16 +15,18 @@ class Authentication(BaseAuthentication):
       auth_header = request.headers.get("Authorization")
       if not auth_header:
         return None
+      
       access_token = auth_header.split(' ')[1] #catch if the token has 1 item 
       decoded_payload = jwt.decode(access_token, 
                                   settings.SECRET_KEY, 
                                   algorithms="HS256")
       user_id = decoded_payload["uid"]
       jti = decoded_payload["jti"]
-      user = users.filter(id=user_id).first()
       if TokenBlackList.objects.filter(id=jti).first():
         raise ValidationError(
           'Incorrect authentication credentials.')
+        
+      user = users.filter(id=user_id).first()
       if user:
         request.jti = jti
         request.uid = user_id

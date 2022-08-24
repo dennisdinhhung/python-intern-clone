@@ -1,11 +1,11 @@
 import jwt
 from django.contrib.auth.models import User
+from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import AuthenticationFailed
 
 from authenticator.models import TokenBlackList
-from django.conf import settings
 
 
 class Authentication(BaseAuthentication):
@@ -17,9 +17,9 @@ class Authentication(BaseAuthentication):
         return None
       
       access_token = auth_header.split(' ')[1] #catch if the token has 1 item 
-      decoded_payload = jwt.decode(access_token, 
-                                  settings.SECRET_KEY, 
-                                  algorithms="HS256")
+      decoded_payload = jwt.decode(jwt = access_token, 
+                                  key = settings.SECRET_KEY, 
+                                  algorithms = "HS256")
       user_id = decoded_payload["uid"]
       jti = decoded_payload["jti"]
       if TokenBlackList.objects.filter(id=jti).first():

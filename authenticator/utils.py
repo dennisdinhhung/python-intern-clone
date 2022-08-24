@@ -1,8 +1,8 @@
 import uuid
 import datetime
 import jwt
-
 from django.conf import settings
+
 
 def token_generator(user, exp_time):
     payload = {

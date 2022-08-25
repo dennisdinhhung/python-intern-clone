@@ -16,15 +16,18 @@ class Authentication(BaseAuthentication):
       if not auth_header:
         return None
       
-      access_token = auth_header.split(' ')[1] #catch if the token has 1 item 
+      split = auth_header.split(' ')
+      if len(split) != 2:
+        raise AuthenticationFailed('Token invalid')
+      
+      access_token = split[1]
       decoded_payload = jwt.decode(jwt = access_token, 
                                   key = settings.SECRET_KEY, 
                                   algorithms = "HS256")
       user_id = decoded_payload["uid"]
       jti = decoded_payload["jti"]
-      if TokenBlackList.objects.filter(id=jti).first():
-        raise ValidationError(
-          'Incorrect authentication credentials.')
+      if TokenBlackList.objects.filter(id=jti, user_id=user_id).first():
+        raise ValidationError('Incorrect authentication credentials.')
         
       user = users.filter(id=user_id).first()
       if user:
@@ -32,10 +35,11 @@ class Authentication(BaseAuthentication):
         request.uid = user_id
         return (user, None)
     except jwt.ExpiredSignatureError:
-      raise AuthenticationFailed({'message': 'Token expired'})
+      raise AuthenticationFailed('Token expired')
     except jwt.exceptions.PyJWTError:
-      raise ValidationError({'message': 'Token validation error'})
-    return None
+      raise ValidationError('Token validation error')
+    except Exception as exception:
+      raise AuthenticationFailed(exception)
   
-  def authenticate_header(self, request): #wtf is this
+  def authenticate_header(self, request):
     return "Authentication error"

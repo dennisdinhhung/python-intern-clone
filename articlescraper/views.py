@@ -10,14 +10,13 @@ from djangoscraper.celery import app as celery_app
 
 
 class ListNewsArticle(APIView):
-    queryset = NewsArticles.objects.all()
     
     def get(self, request):
         search = request.query_params.get('search')
         if search:
-            newsarticle = self.queryset.filter(Q(title__icontains=search)|
-                                               Q(desc__icontains=search)|
-                                               Q(url__icontains=search))
+            newsarticle = NewsArticles.objects.filter(Q(title__icontains=search)|
+                                                      Q(desc__icontains=search)|
+                                                      Q(url__icontains=search))
             serializer = NewsSerializer(newsarticle, many=True)
             return Response(serializer.data)
         
@@ -34,12 +33,12 @@ class ListNewsArticle(APIView):
         title = request.data.get("title")
         desc = request.data.get("desc")
         url = request.data.get("url")
-        url_check = self.queryset.filter(url__icontains=url).first()
+        url_check = NewsArticles.objects.filter(url__icontains=url).first()
         if url_check:
-            return Response({"message": "url already existed"},status=400)
+            raise ValidationError("URL already existed")
         
         NewsArticles.objects.create(title=title, desc=desc, url=url)
-        entry = self.queryset.filter(url__icontains=url).first()
+        entry = NewsArticles.objects.filter(url__icontains=url).first()
         return Response(
             {"id": entry.id},
             status=201)
@@ -52,7 +51,7 @@ class ListNewsArticle(APIView):
         
         entry = NewsArticles.objects.filter(id=pk)
         if not entry.first():
-            return Response({"message":"Entry not found"}, status=400)
+            raise ValidationError("Entry not found")
         
         entry.update(**serializer.validated_data)
         return Response(status=200)
@@ -65,7 +64,7 @@ class ListNewsArticle(APIView):
         
         entry = NewsArticles.objects.filter(id=pk).first()
         if not entry:
-            raise ValidationError({"message":"Entry does not exists"})
+            raise ValidationError("Entry not found")
         entry.delete()
         return Response(status=204)
 

@@ -28,7 +28,7 @@ class DeleteNewsSerializer(serializers.Serializer):
 #get a specific entry using the id
 class DetailedNewsSerializer(serializers.Serializer):
     
-    id = serializers.IntegerField()
+    id = serializers.UUIDField()
     title = serializers.CharField(max_length=200)
     desc = serializers.CharField(max_length=255)
     url = serializers.CharField(max_length=200)

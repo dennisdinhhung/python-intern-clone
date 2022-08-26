@@ -21,7 +21,7 @@ class ListNewsArticle(APIView):
             return Response(serializer.data)
         
         paginator = PageNumberPagination()
-        page_obj = paginator.paginate_queryset(self.queryset, request)
+        page_obj = paginator.paginate_queryset(NewsArticles.objects.all(), request)
         serializer = NewsSerializer(page_obj, many=True)
         return paginator.get_paginated_response(serializer.data)
 

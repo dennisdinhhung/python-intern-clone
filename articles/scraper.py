@@ -3,9 +3,9 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 
-from articlescraper.models import NewsArticles
-from articlescraper.serializers import NewsSerializer
-from djangoscraper.celery import app as celery_app
+from articles.models import NewsArticles
+from articles.serializers import PostNewsSerializer
+from project_main.celery import app as celery_app
 
 
 def get_title(article):
@@ -35,36 +35,39 @@ def get_url(article):
 
 def save(list_content):
     for item in list_content:
-        serializer = NewsSerializer(data=item)
-        if not serializer:
-            raise ValidationError(serializer.errors)
+        # serializer = PostNewsSerializer(data=item) 
+        # if not serializer.is_valid():
+        #     continue
         
         title = item["title"]
-        desc = item["desc"]
+        description = item["description"]
+        if not description:
+            continue
         url = item['url']
         queryset = NewsArticles.objects.all()
         url_check = queryset.filter(url__icontains=url).first()
         if url_check:
             continue
         
-        NewsArticles.objects.create(title=title, desc=desc, url=url)
+        # serialize the object being created
+        NewsArticles.objects.create(title=title, description=description, url=url)
 
 def crawl(base_url):
     list_content = []
     req = requests.get(base_url)
     soup = BeautifulSoup(req.content, 'html.parser')
     
-    # Get title and desc of news
+    # Get title and description of news
     articleTags = soup.find_all('article')
     for article in articleTags:
         article_dict = {}
         article_dict['title'] = get_title(article)
-        article_dict['desc'] = get_desc(article)
+        article_dict['description'] = get_desc(article)
         article_dict['url'] = get_url(article)
         if not article_dict['title']:
             continue
-        if not article_dict['desc']:
-            article_dict['desc'] = None
+        if not article_dict['description']:
+            article_dict['description'] = None
         list_content.append(article_dict)
     save(list_content)
     

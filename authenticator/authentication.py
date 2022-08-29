@@ -24,8 +24,8 @@ class Authentication(BaseAuthentication):
       decoded_payload = jwt.decode(jwt = access_token, 
                                   key = settings.SECRET_KEY, 
                                   algorithms = "HS256")
-      user_id = decoded_payload["uid"]
-      jti = decoded_payload["jti"]
+      user_id = decoded_payload.get('uid')
+      jti = decoded_payload.get('jti')
       if TokenBlackList.objects.filter(id=jti, user_id=user_id).first():
         raise ValidationError('Incorrect authentication credentials.')
         

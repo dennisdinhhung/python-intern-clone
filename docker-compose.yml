@@ -30,7 +30,7 @@ services:
   
   celery:
     build: .
-    command: celery -A djangoscraper.celery worker -l INFO
+    command: celery -A project_main.celery worker -l INFO
     volumes:
       - .:/app
     depends_on:

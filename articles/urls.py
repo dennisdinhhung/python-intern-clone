@@ -1,6 +1,6 @@
 from django.urls import path
 
-from articlescraper.views import GetDetail, Scraper, ListNewsArticle
+from articles.views import GetDetail, Scraper, ListNewsArticle
 
 urlpatterns = [
     path('scrape/', Scraper.as_view(), name='scraper'),

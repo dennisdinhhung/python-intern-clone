@@ -21,8 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'rest_framework',
-    'articlescraper',
+    'articles',
     'authenticator'
 ]
 
@@ -36,7 +37,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'djangoscraper.urls'
+ROOT_URLCONF = 'project_main.urls'
 
 TEMPLATES = [
     {
@@ -54,7 +55,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'djangoscraper.wsgi.application'
+WSGI_APPLICATION = 'project_main.wsgi.application'
 
 
 # Database
@@ -65,9 +66,9 @@ DATABASES = {
         #change into using env        
         'ENGINE': 'django.db.backends.mysql',  
         'NAME': os.getenv('MYSQL_DATABASE'),
-        'USER': os.getenv('MYSQL_USER'),  #root1
+        'USER': os.getenv('MYSQL_USER'),
         'PASSWORD': os.getenv('MYSQL_PASSWORD'),
-        'HOST': os.getenv('MYSQL_HOST'), #db
+        'HOST': os.getenv('MYSQL_HOST'),
         'PORT': os.getenv('MYSQL_PORT'),
     }  
 }  
@@ -126,7 +127,7 @@ REST_FRAMEWORK = {
 SECRET_KEY = os.getenv('SECRET_KEY') #'django-insecure-s*!smb-6abb1zsamtc-v$1cc^lfwaptjcqo$tyt4c%rc+cppk+'
 
 #SCRAPE SETTINGS
-SCRAPE_URL = os.getenv('SCRAPE_URL')
+SCRAPE_URL = 'https://vnexpress.net'
 
 #JWT EXPIRATION TIME
 JWT_EXP_MINUTE = os.getenv('JWT_EXP_MINUTE')
@@ -134,4 +135,4 @@ JWT_EXP_MINUTE = os.getenv('JWT_EXP_MINUTE')
 #CELERY SETTINGS
 BROKER_URL = os.getenv('BROKER_URL')
 CELERY_RESULT = os.getenv('CELERY_RESULT')
-CELERY_IMPORTS = ('articlescraper.scraper', )
+CELERY_IMPORTS = ('articles.scraper', )

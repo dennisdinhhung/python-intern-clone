@@ -8,9 +8,9 @@ demoproject/demoproject/__pycache__
 demoproject/newsscraper/__pycache__
 demoproject/newsscraper/migrations/__pycache__
 /.venv
-articlescraper/__pycache__
+articles/__pycache__
 
-djangoscraper/__pycache__/
+project_main/__pycache__/
 /__pycache__
 /authenticator/__pycache__
 authenticator/migrations/__pycache__/__init__.cpython-310.pyc

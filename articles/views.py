@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import ValidationError
 
-from articlescraper.models import NewsArticles
-from articlescraper.serializers import DeleteNewsSerializer, NewsSerializer, PostNewsSerializer, PutNewsSerializer
-from djangoscraper.celery import app as celery_app
+from articles.models import NewsArticles
+from articles.serializers import DeleteNewsSerializer, NewsSerializer, PostNewsSerializer, PutNewsSerializer
+from project_main.celery import app as celery_app
 
 
 class ListNewsArticle(APIView):
@@ -15,10 +15,10 @@ class ListNewsArticle(APIView):
         search = request.query_params.get('search')
         if search:
             newsarticle = NewsArticles.objects.filter(Q(title__icontains=search)|
-                                                      Q(desc__icontains=search)|
+                                                      Q(description__icontains=search)|
                                                       Q(url__icontains=search))
             serializer = NewsSerializer(newsarticle, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data)                        
         
         paginator = PageNumberPagination()
         page_obj = paginator.paginate_queryset(NewsArticles.objects.all(), request)
@@ -31,13 +31,13 @@ class ListNewsArticle(APIView):
             raise ValidationError(serializer.errors)
             
         title = request.data.get("title")
-        desc = request.data.get("desc")
+        description = request.data.get("description")
         url = request.data.get("url")
         url_check = NewsArticles.objects.filter(url__icontains=url).first()
         if url_check:
             raise ValidationError("URL already existed")
         
-        NewsArticles.objects.create(title=title, desc=desc, url=url)
+        NewsArticles.objects.create(title=title, description=description, url=url)
         entry = NewsArticles.objects.filter(url__icontains=url).first()
         return Response(
             {"id": entry.id},

@@ -27,7 +27,7 @@ def get_desc(article):
         return str(description)
     
 def get_url(article):
-    '''Return the href/link of the news'''
+    """Return the href/link of the news"""
     h3_tag = article.find('h3', class_='title-news')
     if h3_tag:
         a_tag = h3_tag.find('a')['href']
@@ -35,21 +35,14 @@ def get_url(article):
 
 def save(list_content):
     for item in list_content:
-        # serializer = PostNewsSerializer(data=item) 
-        # if not serializer.is_valid():
-        #     continue
-        
         title = item["title"]
         description = item["description"]
-        if not description:
-            continue
         url = item['url']
         queryset = NewsArticles.objects.all()
         url_check = queryset.filter(url__icontains=url).first()
         if url_check:
             continue
         
-        # serialize the object being created
         NewsArticles.objects.create(title=title, description=description, url=url)
 
 def crawl(base_url):
@@ -67,7 +60,7 @@ def crawl(base_url):
         if not article_dict['title']:
             continue
         if not article_dict['description']:
-            article_dict['description'] = None
+            continue
         list_content.append(article_dict)
     save(list_content)
     

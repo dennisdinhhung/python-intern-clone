@@ -9,19 +9,15 @@ from articles.serializers import DeleteNewsSerializer, NewsSerializer, PostNewsS
 from project_main.celery import app as celery_app
 
 
-class ListNewsArticle(APIView):
+class GetListNewsArticle(APIView):
     
     def get(self, request):
-        search = request.query_params.get('search')
-        if search:
-            newsarticle = NewsArticles.objects.filter(Q(title__icontains=search)|
-                                                      Q(description__icontains=search)|
-                                                      Q(url__icontains=search))
-            serializer = NewsSerializer(newsarticle, many=True)
-            return Response(serializer.data)                        
-        
+        search = request.query_params.get('search') or ''
+        newsarticle = NewsArticles.objects.filter(Q(title__icontains=search)|
+                                                  Q(description__icontains=search)|
+                                                  Q(url__icontains=search))
         paginator = PageNumberPagination()
-        page_obj = paginator.paginate_queryset(NewsArticles.objects.all(), request)
+        page_obj = paginator.paginate_queryset(newsarticle, request)
         serializer = NewsSerializer(page_obj, many=True)
         return paginator.get_paginated_response(serializer.data)
 
@@ -42,7 +38,23 @@ class ListNewsArticle(APIView):
         return Response(
             {"id": entry.id},
             status=201)
+
+class Scraper(APIView):
+    queryset = NewsArticles.objects.all()
+    
+    def get(self, request):
+        celery_app.send_task('celery_scraper')
+        return Response(status=200)
+
+class ManageNewsArticle(APIView):
+    
+    def get(self, request, pk):
+        entry = NewsArticles.objects.filter(id=pk).first()
+        if not entry:
+            raise ValidationError({"message":"Entry does not exists"})
         
+        serializer = NewsSerializer(entry)
+        return Response(serializer.data)
     
     def put(self, request, pk):
         serializer = PutNewsSerializer(data=request.data)
@@ -67,20 +79,3 @@ class ListNewsArticle(APIView):
             raise ValidationError("Entry not found")
         entry.delete()
         return Response(status=204)
-
-class Scraper(APIView):
-    queryset = NewsArticles.objects.all()
-    
-    def get(self, request):
-        celery_app.send_task('celery_scraper')
-        return Response(status=200)
-
-class GetDetail(APIView):
-    
-    def get(self, request, pk):
-        entry = NewsArticles.objects.filter(id=pk).first()
-        if not entry:
-            raise ValidationError({"message":"Entry does not exists"})
-        
-        serializer = NewsSerializer(entry)
-        return Response(serializer.data)

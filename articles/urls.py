@@ -1,10 +1,8 @@
 from django.urls import path
 
-from articles.views import GetDetail, Scraper, ListNewsArticle
+from articles.views import ManageNewsArticle, GetListNewsArticle
 
 urlpatterns = [
-    path('scrape/', Scraper.as_view(), name='scraper'),
-    path('', ListNewsArticle.as_view(), name='get_data'),
-    path('<pk>/', ListNewsArticle.as_view(), name='CRUD'),
-    path('details/<pk>/', GetDetail.as_view(), name='get_detail')
+    path('', GetListNewsArticle.as_view(), name='get_list_news'),
+    path('<pk>/', ManageNewsArticle.as_view(), name='manage_news')
 ]

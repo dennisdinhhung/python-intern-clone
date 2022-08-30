@@ -39,18 +39,10 @@ services:
       redis:
         condition: service_started
 
-  # migrate:
-  #   build: .
-  #   command: python3 manage.py migrate --noinput
-  #   volumes:
-  #     - .:/app
-  #   depends_on:
-  #     - db
-  
   django:
     build: .
     container_name: django
-    command: python3 manage.py runserver 0.0.0.0:8000
+    command: bash django-command.sh
     ports:
       - ${DJANGO_HOST_PORT}:8000
     env_file:

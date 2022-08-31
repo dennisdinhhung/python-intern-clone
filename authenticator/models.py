@@ -7,5 +7,5 @@ class TokenBlackList(models.Model):
   
   id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
   jti = models.CharField(max_length=1000)
-  user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+  user = models.ForeignKey(User, on_delete=models.CASCADE)
   create_at = models.DateTimeField(auto_now_add=True)

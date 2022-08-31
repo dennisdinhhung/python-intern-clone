@@ -11,6 +11,12 @@ from project_main.celery import app as celery_app
 
 class GetListNewsArticle(APIView):
     
+    def get_authenticators(self):
+        if self.request.method == "GET":
+            self.authentication_classes = []
+        
+        return [auth() for auth in self.authentication_classes]
+    
     def get(self, request):
         search = request.query_params.get('search') or ''
         newsarticle = NewsArticles.objects.filter(Q(title__icontains=search)|
@@ -25,10 +31,16 @@ class GetListNewsArticle(APIView):
         serializer = PostNewsSerializer(data=request.data)
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
-            
-        title = request.data.get("title")
-        description = request.data.get("description")
-        url = request.data.get("url")
+        
+        print("data")
+        print(type(serializer.data))
+        print("validated_data")
+        print(type(serializer.validated_data))
+        
+        validated = serializer.validated_data
+        title = validated.get("title")
+        description = validated.get("description")
+        url = validated.get("url")
         url_check = NewsArticles.objects.filter(url__icontains=url).first()
         if url_check:
             raise ValidationError("URL already existed")

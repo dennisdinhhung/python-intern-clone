@@ -39,6 +39,16 @@ services:
       redis:
         condition: service_started
 
+  nginx:
+    build: ./nginx
+    volumes:
+      - .:/app
+    ports:
+      - "8080:80"
+    depends_on:
+      django:
+        condition: service_started
+
   django:
     build: .
     container_name: django

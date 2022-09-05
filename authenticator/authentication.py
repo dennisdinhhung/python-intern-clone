@@ -9,6 +9,7 @@ from authenticator.models import TokenBlackList
 
 
 class Authentication(BaseAuthentication):
+  
   def authenticate(self, request):
     try:
       users = User.objects
@@ -26,7 +27,7 @@ class Authentication(BaseAuthentication):
                                   algorithms = "HS256")
       user_id = decoded_payload.get('uid')
       jti = decoded_payload.get('jti')
-      if TokenBlackList.objects.filter(id=jti, user_id=user_id).first():
+      if TokenBlackList.objects.filter(id=jti, user_id=user_id).exists():
         raise ValidationError('Incorrect authentication credentials.')
         
       user = users.filter(id=user_id).first()

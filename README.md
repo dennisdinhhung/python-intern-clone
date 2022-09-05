@@ -51,7 +51,7 @@ python3 manage.py runserver
 ```
 2) Turn on Celery's worker (on a seperate terminal) with:
 ```bazaar
-celery -A project_main.celery worker -l INFO
+celery -A project.celery worker -l INFO
 ```
 3) Turn on Redis:
 

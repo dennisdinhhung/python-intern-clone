@@ -1,34 +1,34 @@
 from rest_framework import serializers
 
-class NewsSerializer(serializers.Serializer):
+class ArticleSerializer(serializers.Serializer):
     
     id = serializers.UUIDField()
     title = serializers.CharField(max_length=200)
-    description = serializers.CharField(max_length=255)
-    url = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=1000)
+    url = serializers.CharField(max_length=1000)
+    
+class ArticleGetListSerializer(serializers.Serializer):
+    search = serializers.CharField(default=None, required=False, max_length=255, allow_blank=True)
 
-class PostNewsSerializer(serializers.Serializer):
+class ArticlePostSerializer(serializers.Serializer):
     
     title = serializers.CharField(max_length=200)
-    description = serializers.CharField(max_length=255)
-    url = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=1000)
+    url = serializers.CharField(max_length=1000)
     
-#put
-class PutNewsSerializer(serializers.Serializer):
+class ArticlePutSerializer(serializers.Serializer):
     
     title = serializers.CharField(max_length=200)
-    description = serializers.CharField(max_length=255)
-    url = serializers.CharField(max_length=200)
-
-#del
-class DeleteNewsSerializer(serializers.Serializer):
+    description = serializers.CharField(max_length=1000)
+    url = serializers.CharField(max_length=1000)
     
-    id = serializers.IntegerField()
+class ArticleDeleteSerializer(serializers.Serializer):
+    
+    id = serializers.UUIDField()
 
-#get a specific entry using the id
-class DetailedNewsSerializer(serializers.Serializer):
+class ArticleGetDetailSerializer(serializers.Serializer):
     
     id = serializers.UUIDField()
     title = serializers.CharField(max_length=200)
-    description = serializers.CharField(max_length=255)
-    url = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=1000)
+    url = serializers.CharField(max_length=1000)

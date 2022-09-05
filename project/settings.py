@@ -37,7 +37,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'project_main.urls'
+ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
     {
@@ -55,7 +55,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'project_main.wsgi.application'
+WSGI_APPLICATION = 'project.wsgi.application'
 
 
 # Database
@@ -127,7 +127,7 @@ REST_FRAMEWORK = {
 SECRET_KEY = os.getenv('SECRET_KEY') #'django-insecure-s*!smb-6abb1zsamtc-v$1cc^lfwaptjcqo$tyt4c%rc+cppk+'
 
 #SCRAPE SETTINGS
-SCRAPE_URL = 'https://vnexpress.net'
+VNEXPRESS_URL = 'https://vnexpress.net'
 
 #JWT EXPIRATION TIME
 JWT_EXP_MINUTE = os.getenv('JWT_EXP_MINUTE')

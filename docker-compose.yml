@@ -30,7 +30,7 @@ services:
   
   celery:
     build: .
-    command: celery -A project_main.celery worker -l INFO
+    command: celery -A project.celery worker -l INFO
     volumes:
       - .:/app
     depends_on:
@@ -52,7 +52,7 @@ services:
   django:
     build: .
     container_name: django
-    command: bash django-command.sh
+    command: bash django_command.sh
     ports:
       - ${DJANGO_HOST_PORT}:8000
     env_file:

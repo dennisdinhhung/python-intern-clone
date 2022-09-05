@@ -7,16 +7,12 @@ from authenticator import authentication
 
 from authenticator.models import TokenBlackList
 from authenticator.serializers import LoginSerializer
-from authenticator.utils import token_generator
+from project.utils import token_generator
 
 
 class Login(APIView):
 
-    def get_authenticators(self):
-        if self.request.method == "POST":
-            self.authentication_classes = []
-        
-        return [auth() for auth in self.authentication_classes]
+    authentication_classes = []
     
     def post(self, request):
         serializer = LoginSerializer(data=request.data)

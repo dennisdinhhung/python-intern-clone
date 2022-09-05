@@ -1,11 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
-from rest_framework.exceptions import ValidationError
 
-from articles.models import NewsArticles
-from articles.serializers import PostNewsSerializer
-from project_main.celery import app as celery_app
+from articles.models import Articles
+from project.celery import app as celery_app
 
 
 def get_title(article):
@@ -38,14 +36,12 @@ def save(list_content):
         title = item["title"]
         description = item["description"]
         url = item['url']
-        queryset = NewsArticles.objects.all()
-        url_check = queryset.filter(url__icontains=url).first()
-        if url_check:
-            continue
-        
-        NewsArticles.objects.create(title=title, description=description, url=url)
+        if not Articles.objects.filter(url=url).exists():
+            Articles.objects.create(title=title, description=description, url=url)
 
-def crawl(base_url):
+@celery_app.task(name='celery_scraper', bind=True)
+def scrape(self):
+    base_url = settings.SCRAPE_URL + '/giao-duc'
     list_content = []
     req = requests.get(base_url)
     soup = BeautifulSoup(req.content, 'html.parser')
@@ -67,8 +63,4 @@ def crawl(base_url):
     a_tag = soup.find('a', class_='next-page')
     if a_tag:
         next_url = settings.SCRAPE_URL + a_tag['href']
-        crawl(base_url=next_url)
-        
-@celery_app.task(name='celery_scraper', bind=True)
-def scrape(self):
-    crawl(base_url=settings.SCRAPE_URL + '/giao-duc')
+        scrape(base_url=next_url)

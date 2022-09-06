@@ -40,8 +40,7 @@ def save(list_content):
             Articles.objects.create(title=title, description=description, url=url)
 
 @celery_app.task(name='celery_scraper', bind=True)
-def scrape(self):
-    base_url = settings.SCRAPE_URL + '/giao-duc'
+def crawl(self, base_url):
     list_content = []
     req = requests.get(base_url)
     soup = BeautifulSoup(req.content, 'html.parser')
@@ -62,5 +61,10 @@ def scrape(self):
     
     a_tag = soup.find('a', class_='next-page')
     if a_tag:
-        next_url = settings.SCRAPE_URL + a_tag['href']
-        scrape(base_url=next_url)
+        next_url = settings.VNEXPRESS_URL + a_tag['href']
+        # crawl(base_url=next_url)
+        celery_app.send_task('celery_scraper', (next_url, ))
+        
+
+def scrape(self):
+    crawl(base_url=settings.VNEXPRESS_URL + '/giao-duc')

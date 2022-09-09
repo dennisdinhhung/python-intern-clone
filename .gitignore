@@ -163,9 +163,4 @@ cython_debug/
 
 #vscode json
 .vscode/
-.idea/.gitignore
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/web-scraper.iml
-.idea/inspectionProfiles/profiles_settings.xml
+.idea/

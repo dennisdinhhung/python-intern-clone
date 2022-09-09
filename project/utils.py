@@ -11,6 +11,6 @@ def token_generator(user_id, exp_time):
         "iat": datetime.datetime.utcnow(),
         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=int(exp_time)),
     }
-    key = settings.SECRET_KEY
-    token = jwt.encode(payload, key)
+    secret_key = settings.SECRET_KEY
+    token = jwt.encode(payload, secret_key)
     return token

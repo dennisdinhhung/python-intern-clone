@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 
-load_dotenv()
+load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,8 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
     'rest_framework',
+    
     'articles',
     'authenticator'
 ]
@@ -61,17 +61,17 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {  
-    'default': {  
-        #change into using env        
-        'ENGINE': 'django.db.backends.mysql',  
+DATABASES = {
+    'default': {
+        # change into using env
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('MYSQL_DATABASE'),
         'USER': os.getenv('MYSQL_USER'),
         'PASSWORD': os.getenv('MYSQL_PASSWORD'),
         'HOST': os.getenv('MYSQL_HOST'),
         'PORT': os.getenv('MYSQL_PORT'),
-    }  
-}  
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -123,16 +123,17 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100
 }
 
-#SECRET KEY
-SECRET_KEY = os.getenv('SECRET_KEY') #'django-insecure-s*!smb-6abb1zsamtc-v$1cc^lfwaptjcqo$tyt4c%rc+cppk+'
+# SECRET KEY
+# 'django-insecure-s*!smb-6abb1zsamtc-v$1cc^lfwaptjcqo$tyt4c%rc+cppk+'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-#SCRAPE SETTINGS
-VNEXPRESS_URL = 'https://vnexpress.net'
+# SCRAPE SETTINGS
+VNEXPRESS_URL = os.getenv('', 'https://vnexpress.net')
 
-#JWT EXPIRATION TIME
+# JWT EXPIRATION TIME
 JWT_EXP_MINUTE = os.getenv('JWT_EXP_MINUTE')
 
-#CELERY SETTINGS
+# CELERY SETTINGS
 BROKER_URL = os.getenv('BROKER_URL')
 CELERY_RESULT = os.getenv('CELERY_RESULT')
 CELERY_IMPORTS = ('articles.scraper', )

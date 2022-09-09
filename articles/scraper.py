@@ -82,6 +82,5 @@ def crawl(self, page=1):
         raise self.retry(exec=e, countdown=5)
     save(article_tags)
 
-    page = get_next_page(base_url)
-    if page:
+    if get_next_page(base_url):
         celery_app.send_task('tasks.article_scraper', (page + 1,))

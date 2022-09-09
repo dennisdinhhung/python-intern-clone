@@ -100,6 +100,5 @@ class ArticleDetail(APIView):
 class ArticleScraper(APIView):
 
     def get(self, request):
-        base_url = settings.VNEXPRESS_URL + '/giao-duc'
-        celery_app.send_task('celery_scraper', (base_url,))
+        celery_app.send_task('tasks.article_scraper')
         return Response(status=200)

@@ -1,9 +1,11 @@
+import re
 import requests
+
 from bs4 import BeautifulSoup
 from django.conf import settings
 
 from articles.models import Articles
-from project.celery import app as celery_app
+from project.tasks import app as celery_app
 
 
 def get_title(article):
@@ -12,7 +14,8 @@ def get_title(article):
     if h3_tag:
         a_tag = h3_tag.find('a').string.strip()
         return str(a_tag)
-        
+
+
 def get_desc(article):
     """Return the description of the news"""
     p_tag = article.find('p', class_='description')
@@ -23,7 +26,8 @@ def get_desc(article):
                 continue
             description = item
         return str(description)
-    
+
+
 def get_url(article):
     """Return the href/link of the news"""
     h3_tag = article.find('h3', class_='title-news')
@@ -31,40 +35,53 @@ def get_url(article):
         a_tag = h3_tag.find('a')['href']
         return str(a_tag)
 
-def save(list_content):
-    for item in list_content:
+
+def save(article_tags):
+    """Save article"""
+    list_articles = []
+    for article in article_tags:
+        article_dict = {
+            'title': get_title(article),
+            'description': get_desc(article),
+            'url': get_url(article)}
+        if not article_dict['title']:
+            continue
+        if not article_dict['description']:
+            continue
+        list_articles.append(article_dict)
+    # Articles.objects.bulk_create(list_articles)
+
+    # try bulk create here
+
+    for item in list_articles:
         title = item["title"]
         description = item["description"]
         url = item['url']
         if not Articles.objects.filter(url=url).exists():
             Articles.objects.create(title=title, description=description, url=url)
 
-@celery_app.task(name='celery_scraper', bind=True)
-def crawl(self, base_url):
-    list_content = []
-    req = requests.get(base_url)
-    soup = BeautifulSoup(req.content, 'html.parser')
-    
-    # Get title and description of news
-    articleTags = soup.find_all('article')
-    for article in articleTags:
-        article_dict = {}
-        article_dict['title'] = get_title(article)
-        article_dict['description'] = get_desc(article)
-        article_dict['url'] = get_url(article)
-        if not article_dict['title']:
-            continue
-        if not article_dict['description']:
-            continue
-        list_content.append(article_dict)
-    save(list_content)
-    
-    a_tag = soup.find('a', class_='next-page')
-    if a_tag:
-        next_url = settings.VNEXPRESS_URL + a_tag['href']
-        # crawl(base_url=next_url)
-        celery_app.send_task('celery_scraper', (next_url, ))
-        
 
-def scrape(self):
-    crawl(base_url=settings.VNEXPRESS_URL + '/giao-duc')
+def get_next_page(base_url):
+    # try to get the next page
+    req = get_next_page(base_url)
+    soup = BeautifulSoup(req.content, 'html.parser')
+    next_article_tags = soup.find_all('article')
+    if next_article_tags:
+        return True
+    return False
+
+
+@celery_app.task(name='tasks.article_scraper', bind=True)
+def crawl(self, page=1):
+    base_url = f'{settings.VNEXPRESS_URL}/giao-duc-p{page}'
+    try:
+        req = requests.get(base_url)
+        soup = BeautifulSoup(req.content, 'html.parser')
+        article_tags = soup.find_all('article')
+    except requests.exceptions.RequestException as e:
+        raise self.retry(exec=e, countdown=5)
+    save(article_tags)
+
+    page = get_next_page(base_url)
+    if page:
+        celery_app.send_task('tasks.article_scraper', (page + 1,))

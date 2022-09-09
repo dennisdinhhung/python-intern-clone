@@ -19,7 +19,6 @@ class Authentication(BaseAuthentication):
             auth_header = request.headers.get("Authorization")
             if not auth_header:
                 return None
-
             split = auth_header.split(' ')
             if len(split) != 2:
                 raise AuthenticationFailed('Token invalid.')
@@ -30,8 +29,9 @@ class Authentication(BaseAuthentication):
             if TokenBlackList.objects.filter(id=jti).exists():
                 raise ValidationError('Incorrect authentication credentials.')
 
-            user = users.filter(id=user_id).first()
-            if user:
+            user_id = payload.get('uid')
+            user = users.filter(id=user_id)
+            if users.filter(id=user_id).exists():
                 request.jti = jti
                 return (user, None)
 

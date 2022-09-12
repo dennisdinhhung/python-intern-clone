@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -10,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = ['*']
 # Application definition
@@ -22,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    
+
     'articles',
     'authenticator'
 ]
@@ -56,7 +55,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'project.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -101,7 +99,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
@@ -133,6 +130,6 @@ VNEXPRESS_URL = os.getenv('', 'https://vnexpress.net')
 JWT_EXP_MINUTE = os.getenv('JWT_EXP_MINUTE')
 
 # CELERY SETTINGS
-BROKER_URL = os.getenv('BROKER_URL')
-CELERY_RESULT = os.getenv('CELERY_RESULT')
-CELERY_IMPORTS = ('articles.scraper', )
+BROKER_URL = os.getenv('BROKER_URL', '...')
+CELERY_RESULT = os.getenv('CELERY_RESULT', '')
+CELERY_IMPORTS = ('articles.tasks',)

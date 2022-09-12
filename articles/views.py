@@ -9,7 +9,7 @@ from articles.models import Articles
 from articles.serializers import ArticleGetListSerializer, ArticleSerializer, \
     ArticleDeleteSerializer, ArticleUpdateSerializer, \
     ArticleCreateSerializer, ArticleGetSerializer
-from project.tasks import app as celery_app
+from project.celery import app as celery_app
 
 
 class ArticleList(APIView):
@@ -25,15 +25,13 @@ class ArticleList(APIView):
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
 
-        search = request.query_params.get('search') or ''
-        articles = Articles.objects \
-            .filter(Q(title__icontains=search) |
-                    Q(description__icontains=search) |
-                    Q(url__icontains=search))
+        search = serializer.validated_data['search'] or ''
+        articles = Articles.objects.filter(Q(title__icontains=search) |
+                                           Q(description__icontains=search) |
+                                           Q(url__icontains=search))
         paginator = PageNumberPagination()
         page_obj = paginator.paginate_queryset(articles, request)
         serializer = ArticleSerializer(page_obj, many=True)
-
         return paginator.get_paginated_response(serializer.data)
 
     def post(self, request):
@@ -42,15 +40,11 @@ class ArticleList(APIView):
             raise ValidationError(serializer.errors)
 
         data = serializer.validated_data
-        title = data.get("title")
-        description = data.get("description")
         url = data.get("url")
         if Articles.objects.filter(url=url).exists():
             raise ValidationError("Article already existed")
-        article = Articles.objects. \
-            create(title=title, description=description, url=url)
-
-        return Response({"id": article.id, "message": "Update successful."}, status=201)
+        article = Articles.objects.create(**serializer.validated_data)
+        return Response({"id": article.id, "message": "Create successful."}, status=201)
 
 
 class ArticleDetail(APIView):
@@ -64,24 +58,22 @@ class ArticleDetail(APIView):
         serializer = ArticleGetSerializer(data={"id": pk})
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
-
         if not Articles.objects.filter(id=pk).exists():
             raise ValidationError({"message": "Article does not exists."})
 
         article = Articles.objects.filter(id=pk).first()
-        output_serializer = ArticleSerializer(article)
-        return Response(output_serializer.data)
+        output = ArticleSerializer(article).data
+        return Response(output)
 
     def put(self, request, pk):
-        serializer = ArticleUpdateSerializer(data=request.data)
+        serializer = ArticleUpdateSerializer(data={**request.data, 'id': pk})
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
 
-        article = Articles.objects.filter(id=pk)
-        if not article.first():
+        article = Articles.objects.filter(id=pk).first()
+        if not article:
             raise ValidationError("Article not found")
         article.update(**serializer.validated_data)
-
         return Response({"message": " Article update successful."}, status=200)
 
     def delete(self, request, pk):
@@ -89,10 +81,9 @@ class ArticleDetail(APIView):
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
 
-        article = Articles.objects.filter(id=pk)
-        if not article.exists():
+        article = Articles.objects.filter(id=pk).first()
+        if not article:
             raise ValidationError("Article not found")
-
         article.delete()
         return Response(status=204)
 

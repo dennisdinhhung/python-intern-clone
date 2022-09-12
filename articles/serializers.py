@@ -19,8 +19,9 @@ class ArticleCreateSerializer(serializers.Serializer):
 
 
 class ArticleUpdateSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
     title = serializers.CharField(max_length=200)
-    description = serializers.CharField(max_length=1000)
+    description = serializers.CharField(max_length=1000, required=False)
     url = serializers.CharField(max_length=1000)
 
 

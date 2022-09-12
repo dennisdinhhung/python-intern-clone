@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 
 from articles.models import Articles
-from project.tasks import app as celery_app
+from project.celery import app as celery_app
 
 
 def get_title(article):
@@ -36,9 +36,21 @@ def get_url(article):
         return str(a_tag)
 
 
-def save(article_tags):
-    """Save article"""
-    list_articles = []
+def save_articles(articles):
+    for article in articles:
+        title = article["title"]
+        description = article["description"]
+        url = article['url']
+        if not Articles.objects.filter(url=url).exists():
+            Articles.objects.create(title=title, description=description, url=url)
+
+
+def get_articles(page):
+    base_url = f'{settings.VNEXPRESS_URL}/giao-duc-p{page}'
+    req = requests.get(base_url)
+    soup = BeautifulSoup(req.content, 'html.parser')
+    article_tags = soup.find_all('article')
+    articles = []
     for article in article_tags:
         article_dict = {
             'title': get_title(article),
@@ -48,39 +60,18 @@ def save(article_tags):
             continue
         if not article_dict['description']:
             continue
-        list_articles.append(article_dict)
-    # Articles.objects.bulk_create(list_articles)
+        articles.append(article_dict)
 
-    # try bulk create here
-
-    for item in list_articles:
-        title = item["title"]
-        description = item["description"]
-        url = item['url']
-        if not Articles.objects.filter(url=url).exists():
-            Articles.objects.create(title=title, description=description, url=url)
+    if soup.find('a', class_='next-page'):
+        is_next_page = True
+    else:
+        is_next_page = False
+    return articles, is_next_page
 
 
-def get_next_page(base_url):
-    # try to get the next page
-    req = get_next_page(base_url)
-    soup = BeautifulSoup(req.content, 'html.parser')
-    next_article_tags = soup.find_all('article')
-    if next_article_tags:
-        return True
-    return False
-
-
-@celery_app.task(name='tasks.article_scraper', bind=True)
+@celery_app.task(name='tasks.article_scraper', bind=True, default_retry_delay=3, autoretry_for=(Exception,))
 def crawl(self, page=1):
-    base_url = f'{settings.VNEXPRESS_URL}/giao-duc-p{page}'
-    try:
-        req = requests.get(base_url)
-        soup = BeautifulSoup(req.content, 'html.parser')
-        article_tags = soup.find_all('article')
-    except requests.exceptions.RequestException as e:
-        raise self.retry(exec=e, countdown=5)
-    save(article_tags)
-
-    if get_next_page(base_url):
+    articles, is_next_page = get_articles(page)
+    save_articles(articles)
+    if is_next_page:
         celery_app.send_task('tasks.article_scraper', (page + 1,))

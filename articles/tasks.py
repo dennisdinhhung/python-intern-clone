@@ -68,7 +68,7 @@ def get_articles(page):
     return articles, is_next_page
 
 
-@celery_app.task(name='tasks.article_scraper', bind=True, default_retry_delay=3, autoretry_for=(Exception,))
+@celery_app.task(name='tasks.article_scraper', bind=True, default_retry_delay=3, autoretry_for=(Exception,), retry_kwargs={'max_retries': 5})
 def crawl(self, page=1):
     articles, is_next_page = get_articles(page)
     save_articles(articles)

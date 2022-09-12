@@ -26,9 +26,10 @@ class ArticleList(APIView):
             raise ValidationError(serializer.errors)
 
         search = serializer.validated_data['search'] or ''
-        articles = Articles.objects.filter(Q(title__icontains=search) |
-                                           Q(description__icontains=search) |
-                                           Q(url__icontains=search))
+        articles = Articles.objects \
+            .filter(Q(title__icontains=search) |
+                    Q(description__icontains=search) |
+                    Q(url__icontains=search))
         paginator = PageNumberPagination()
         page_obj = paginator.paginate_queryset(articles, request)
         serializer = ArticleSerializer(page_obj, many=True)
@@ -44,7 +45,7 @@ class ArticleList(APIView):
         if Articles.objects.filter(url=url).exists():
             raise ValidationError("Article already existed")
         article = Articles.objects.create(**serializer.validated_data)
-        return Response({"id": article.id, "message": "Create successful."}, status=201)
+        return Response({"id": article.id, "message": "Aricle create successful."}, status=201)
 
 
 class ArticleDetail(APIView):
@@ -74,7 +75,7 @@ class ArticleDetail(APIView):
         if not article:
             raise ValidationError("Article not found")
         article.update(**serializer.validated_data)
-        return Response({"message": " Article update successful."}, status=200)
+        return Response({"message": "Article update successful."}, status=200)
 
     def delete(self, request, pk):
         serializer = ArticleDeleteSerializer(data={"id": pk})

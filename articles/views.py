@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -25,7 +24,7 @@ class ArticleList(APIView):
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
 
-        search = serializer.validated_data['search'] or ''
+        search = serializer.validated_data.get('search') or ''
         articles = Articles.objects \
             .filter(Q(title__icontains=search) |
                     Q(description__icontains=search) |
@@ -45,7 +44,7 @@ class ArticleList(APIView):
         if Articles.objects.filter(url=url).exists():
             raise ValidationError("Article already existed")
         article = Articles.objects.create(**serializer.validated_data)
-        return Response({"id": article.id, "message": "Aricle create successful."}, status=201)
+        return Response({"id": article.id, "message": "Article create successful."}, status=201)
 
 
 class ArticleDetail(APIView):
@@ -73,7 +72,7 @@ class ArticleDetail(APIView):
 
         article = Articles.objects.filter(id=pk).first()
         if not article:
-            raise ValidationError("Article not found")
+            raise ValidationError("Article not found.")
         article.update(**serializer.validated_data)
         return Response({"message": "Article update successful."}, status=200)
 
@@ -84,7 +83,7 @@ class ArticleDetail(APIView):
 
         article = Articles.objects.filter(id=pk).first()
         if not article:
-            raise ValidationError("Article not found")
+            raise ValidationError("Article not found.")
         article.delete()
         return Response(status=204)
 

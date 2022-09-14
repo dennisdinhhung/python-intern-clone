@@ -62,6 +62,7 @@ def get_articles(html_content):
             continue
         data = Articles(**serializer.validated_data)
         articles.append(data)
+    # TODO: bug: repeated articles, need to check with database
     return articles
 
 

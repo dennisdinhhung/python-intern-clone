@@ -124,12 +124,12 @@ REST_FRAMEWORK = {
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SCRAPE SETTINGS
-VNEXPRESS_URL = os.getenv('', 'https://vnexpress.net')
+VNEXPRESS_URL = os.getenv('VNEXPRESS_URL', 'https://vnexpress.net')
 
 # JWT EXPIRATION TIME
 JWT_EXP_MINUTE = os.getenv('JWT_EXP_MINUTE')
 
 # CELERY SETTINGS
-BROKER_URL = os.getenv('BROKER_URL', '...')
-CELERY_RESULT = os.getenv('CELERY_RESULT', '')
+BROKER_URL = os.getenv('BROKER_URL')
+CELERY_RESULT = os.getenv('CELERY_RESULT')
 CELERY_IMPORTS = ('articles.tasks',)

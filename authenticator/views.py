@@ -24,7 +24,7 @@ class Login(APIView):
             raise ValidationError({"message": "Username or Password is incorrect."})
 
         exp_time = settings.JWT_EXP_MINUTE
-        user_id = user.id  # check this
+        user_id = user.id
         token = token_generator(user_id, exp_time)
         return Response({"access_token": token, "message": "Login successful."})
 
@@ -35,5 +35,5 @@ class Logout(APIView):
         jti = request.jti
         user = request.user
         user_id = user.id
-        TokenBlackList.objects.create(jti=jti, user_id=user_id)
+        TokenBlackList.objects.create(jti=jti, user=user_id)
         return Response({"message": "Logout Successful."})

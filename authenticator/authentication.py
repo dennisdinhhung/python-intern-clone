@@ -30,8 +30,8 @@ class Authentication(BaseAuthentication):
                 raise ValidationError('Incorrect authentication credentials.')
 
             user_id = payload.get('uid')
-            user = users.filter(id=user_id)
-            if users.filter(id=user_id).exists():
+            user = users.filter(id=user_id).first()
+            if users.filter(id=user_id):
                 request.jti = jti
                 return (user, None)
 

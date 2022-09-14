@@ -73,7 +73,11 @@ class ArticleDetail(APIView):
         article = Articles.objects.filter(id=pk).first()
         if not article:
             raise ValidationError("Article not found.")
-        article.update(**serializer.validated_data)
+        data = serializer.validated_data
+        article.title = data.get('title')
+        article.description = data.get('description')
+        article.url = data.get('url')
+        article.save()
         return Response({"message": "Article update successful."}, status=200)
 
     def delete(self, request, pk):

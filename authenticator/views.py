@@ -35,5 +35,5 @@ class Logout(APIView):
         jti = request.jti
         user = request.user
         user_id = user.id
-        TokenBlackList.objects.create(jti=jti, user=user_id)
+        TokenBlackList.objects.create(jti=jti, user_id=user_id)
         return Response({"message": "Logout Successful."})

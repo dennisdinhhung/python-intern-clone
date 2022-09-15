@@ -36,15 +36,6 @@ def get_url(article):
     return str(a_tag)
 
 
-def save_articles(articles):
-    for article in articles:
-        title = article["title"]
-        description = article["description"]
-        url = article['url']
-        if not Articles.objects.filter(url=url).exists():
-            Articles.objects.create(title=title, description=description, url=url)
-
-
 def get_articles(html_content):
     article_tags = html_content.find_all('article')
     articles = []
@@ -60,9 +51,13 @@ def get_articles(html_content):
         serializer = ArticleCreateSerializer(data=article_dict)
         if not serializer.is_valid():
             continue
+        
+        validated_url = serializer.validated_data.get("url")
+        is_article_existed = Articles.objects.filter(url=validated_url).exists()
+        if is_article_existed:
+            continue
         data = Articles(**serializer.validated_data)
         articles.append(data)
-    # TODO: bug: repeated articles, need to check with database
     return articles
 
 

@@ -6,6 +6,8 @@ class ArticleSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=1000)
     url = serializers.CharField(max_length=1000)
+    create_at = serializers.DateTimeField()
+    updated_at = serializers.DateTimeField()
 
 
 class ArticleGetListSerializer(serializers.Serializer):
